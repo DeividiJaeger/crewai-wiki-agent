@@ -14,7 +14,7 @@ O projeto usa o framework CrewAI para criar um agente inteligente que responde p
 ## Estrutura do Projeto
 
 ```
-teste-crew/
+crewai-wiki-agent/
 ├── .env                  # Arquivo com as variáveis de ambiente
 ├── Dockerfile            # Configuração do Docker
 ├── main.py               # Código principal do projeto
@@ -37,15 +37,15 @@ GROQ_API_KEY=sua_chave_api_aqui
 Execute o seguinte comando na pasta raiz do projeto:
 
 ```bash
-docker build -t teste-crew .
+docker build -t crewai-wiki-agent .
 ```
 
-Este comando cria uma imagem Docker chamada `teste-crew` a partir das instruções no Dockerfile.
+Este comando cria uma imagem Docker chamada `crewai-wiki-agent` a partir das instruções no Dockerfile.
 
 ### 3. Execute o Container
 
 ```bash
-docker run teste-crew
+docker run crewai-wiki-agent
 ```
 
 Este comando inicia o container e executa o código que faz a consulta ao modelo de linguagem da Groq.
@@ -56,10 +56,10 @@ Após fazer alterações apenas no código Python (sem alterar dependências):
 
 ```bash
 # Constrói novamente a imagem, aproveitando as camadas em cache
-docker build -t teste-crew .
+docker build -t crewai-wiki-agent .
 
 # Executa o container
-docker run teste-crew
+docker run crewai-wiki-agent
 ```
 
 O Docker é inteligente e usará cache para as camadas que não mudaram, economizando tempo na reconstrução.
@@ -69,7 +69,7 @@ O Docker é inteligente e usará cache para as camadas que não mudaram, economi
 Se você precisar reconstruir tudo do zero (por exemplo, após adicionar novas dependências):
 
 ```bash
-docker build --no-cache -t teste-crew .
+docker build --no-cache -t crewai-wiki-agent .
 ```
 
 ## Verificando Logs e Depuração
@@ -77,7 +77,7 @@ docker build --no-cache -t teste-crew .
 Para ver os logs em tempo real durante a execução:
 
 ```bash
-docker run -it teste-crew
+docker run -it crewai-wiki-agent
 ```
 
 ## Explicação dos Componentes
@@ -102,7 +102,7 @@ Se encontrar erros relacionados à importação de bibliotecas:
 
 ```bash
 # Verifique se o requirements.txt está correto e reconstrua a imagem
-docker build --no-cache -t teste-crew .
+docker build --no-cache -t crewai-wiki-agent .
 ```
 
 ### Erro na Chave da API
@@ -110,8 +110,8 @@ docker build --no-cache -t teste-crew .
 Se o erro estiver relacionado à autenticação com o Groq:
 
 1. Verifique se sua chave API está correta no arquivo `.env`
-2. Reconstrua a imagem: `docker build -t teste-crew .`
-3. Execute novamente: `docker run teste-crew`
+2. Reconstrua a imagem: `docker build -t crewai-wiki-agent .`
+3. Execute novamente: `docker run crewai-wiki-agent`
 
 ### Container Finaliza sem Resposta
 
@@ -119,5 +119,5 @@ Se o container terminar sem dar uma resposta:
 
 ```bash
 # Execute com modo interativo para ver mensagens de erro
-docker run -it teste-crew
+docker run -it crewai-wiki-agent
 ```
