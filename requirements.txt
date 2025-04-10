@@ -1,0 +1,4 @@
+crewai
+groq
+python-dotenv
+typing_extensions
