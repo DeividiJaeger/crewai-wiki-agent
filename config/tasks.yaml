@@ -1,0 +1,23 @@
+realizar_pesquisa:
+  description: >
+    Faça uma pesquisa simples sobre o tema usando DuckDuckGo.
+    Foque apenas nos pontos principais, evitando detalhes técnicos ou históricos extensos.
+
+  expected_output: >
+    Um resumo direto com no máximo 2 tópicos curtos, com dados atualizados.
+
+  agent: pesquisador
+
+sintetizar_informacoes:
+  description: >
+    Resuma as informações do pesquisador de forma clara e direta.
+    Elimine repetições e foque nos pontos-chave mais relevantes.
+
+    **Tema:**
+    {tema}
+    
+  expected_output: >
+    Um resumo curto e objetivo, com no máximo 2 linhas, destacando apenas os pontos essenciais.
+    O texto deve ser fácil de entender e cobrir o tema de forma geral, sem detalhes técnicos.
+
+  agent: sintetizador
