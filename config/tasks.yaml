@@ -11,13 +11,13 @@ realizar_pesquisa:
 sintetizar_informacoes:
   description: >
     Resuma as informações do pesquisador de forma clara e direta.
-    Elimine repetições e foque nos pontos-chave mais relevantes.
+    Elimine repetições e foque nos pontos-chave mais relevantes, identifique o tema também.
 
     **Tema:**
     {tema}
     
   expected_output: >
-    Um resumo curto e objetivo, com no máximo 2 linhas, destacando apenas os pontos essenciais.
+    Um resumo curto e objetivo mostrando o tema e com no máximo 2 linhas, destacando apenas os pontos essenciais.
     O texto deve ser fácil de entender e cobrir o tema de forma geral, sem detalhes técnicos.
 
   agent: sintetizador

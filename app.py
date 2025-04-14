@@ -15,5 +15,14 @@ if st.button("Pesquisar"):
         st.write("Pesquisando na web usando DuckDuckGo...")
         # Chama a função de pesquisa
         resultado = run_pesquisador(pergunta_usuario)
-        st.subheader("Resultado da pesquisa:")
-        st.write(resultado)
+        
+        # Exibe os resultados formatados
+        st.subheader(f"Tema: {resultado.tema}")
+        
+        if resultado.resultados:
+            st.write("### Resultados:")
+            for res in resultado.resultados:
+                st.write(f"**{res.topico}:** {res.descricao}")
+        
+        st.write("### Resumo:")
+        st.write(resultado.resumo)
