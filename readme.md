@@ -1,4 +1,4 @@
-# 🔍 Pesquisador Web com CrewAI e DuckDuckGo
+# 🔍 Redator e pesquisador Wikipedia
 
 Um assistente de pesquisa que usa agentes de IA para buscar informações na web através do DuckDuckGo e sintetizar resultados de forma clara e objetiva.
 
