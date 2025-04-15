@@ -91,9 +91,6 @@ Este projeto usa o Llama 3.1 8B Instant através da API da Groq. Para usar outro
 
 ## Testes
 Para executar os testes automatizados:
-```bash
-python -m tests.test_api
-```
 
 Para executar os testes manuais da API (a API deve estar em execução):
 ```bash
