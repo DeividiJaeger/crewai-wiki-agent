@@ -11,7 +11,7 @@ from tools.text_processor import extract_key_points
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Configurar LLM com a API key do Groq - reduzindo temperature para diminuir verbosidade
+# Configurar LLM com a API key do Groq - reduzi temperature para diminuir verbosidade
 llm = LLM(
     model="groq/meta-llama/llama-4-scout-17b-16e-instruct", 
     temperature=0.1,  # Temperatura mais baixa para respostas mais diretas
@@ -45,7 +45,7 @@ class PesquisaCrew:
     def wikipedia_pesquisador(self) -> Agent:
         return Agent(
             config=self.agents_config["wikipedia_pesquisador"],
-            verbose=True,  # Reduzir verbosidade para economizar tokens
+            verbose=True, 
             tools=[wikipedia_resumo, extract_key_points],
             llm=llm,
         )
@@ -54,7 +54,7 @@ class PesquisaCrew:
     def redator_artigo(self) -> Agent:
         return Agent(
             config=self.agents_config["redator_artigo"],
-            verbose=True,  # Reduzir verbosidade para economizar tokens
+            verbose=True,  
             tools=[],
             llm=llm,
         )
@@ -113,7 +113,7 @@ class PesquisaCrew:
             agents=[self.wikipedia_pesquisador(), self.redator_artigo()],
             tasks=[wiki_task, artigo_task],
             process=Process.sequential,
-            verbose=False,  # Reduzir verbosidade para economizar tokens
+            verbose=False, 
         )
         
     def format_output(self, result) -> PesquisaOutput:
@@ -121,17 +121,14 @@ class PesquisaCrew:
         Formata o resultado da Crew usando o modelo Pydantic.
         """
         try:
-            # Simplificando a extração do resultado para reduzir processamento
             if hasattr(result, "raw_output"):
                 resultado_texto = str(result.raw_output)
             else:
                 resultado_texto = str(result)
             
-            # Simplificando a estrutura do resultado
             tema = "Artigo sobre o tema solicitado"
             resumo = resultado_texto
             
-            # Removendo a criação de múltiplos resultados para economizar tokens
             return PesquisaOutput(
                 tema=tema,
                 resultados=[PesquisaResultado(topico="Artigo", descricao="Artigo de 300 palavras gerado")],
