@@ -29,10 +29,6 @@ Após a execução, a interface web abrirá automaticamente no seu navegador pad
 ### API REST (FastAPI)
 Para iniciar o servidor API:
 ```bash
-python iniciar_api.py
-```
-ou
-```bash
 python -m api.start_api
 ```
 
