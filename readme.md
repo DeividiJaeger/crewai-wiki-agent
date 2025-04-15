@@ -90,8 +90,6 @@ Personalize agentes e tarefas editando os arquivos YAML na pasta config:
 Este projeto usa o Llama 3.1 8B Instant através da API da Groq. Para usar outro modelo ou provedor, modifique a configuração LLM em `crew.py`.
 
 ## Testes
-Para executar os testes automatizados:
-
 Para executar os testes manuais da API (a API deve estar em execução):
 ```bash
 python -m tests.test_api_manual --teste completo
