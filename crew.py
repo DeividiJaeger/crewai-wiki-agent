@@ -1,30 +1,22 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
-from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchRun
 from crewai.tools import tool
 import os
 from dotenv import load_dotenv
 from models import PesquisaOutput, PesquisaResultado
+from tools.wiki_resumo import wikipedia_resumo
+from tools.web_search_ddg import search_web
+from tools.text_processor import extract_key_points
 
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Configurar LLM com a API key do Groq
-llm = LLM(model="groq/meta-llama/llama-4-scout-17b-16e-instruct", temperature=0.5, api_key=os.getenv("GROQ_API_KEY"))
-
-# Criando uma ferramenta compatível com CrewAI
-@tool("web_search")
-def search_web(query: str) -> str:
-    """Busca informações na web usando DuckDuckGo.
-    
-    Args:
-        query: O termo de busca que você deseja pesquisar.
-        
-    Returns:
-        Resultados da pesquisa como uma string.
-    """
-    search = DuckDuckGoSearchRun()
-    return search.run(query)
+# Configurar LLM com a API key do Groq - reduzindo temperature para diminuir verbosidade
+llm = LLM(
+    model="groq/meta-llama/llama-4-scout-17b-16e-instruct", 
+    temperature=0.1,  # Temperatura mais baixa para respostas mais diretas
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
 @CrewBase
 class PesquisaCrew:
@@ -49,6 +41,24 @@ class PesquisaCrew:
             llm=llm,
         )
     
+    @agent 
+    def wikipedia_pesquisador(self) -> Agent:
+        return Agent(
+            config=self.agents_config["wikipedia_pesquisador"],
+            verbose=True,  # Reduzir verbosidade para economizar tokens
+            tools=[wikipedia_resumo, extract_key_points],
+            llm=llm,
+        )
+        
+    @agent
+    def redator_artigo(self) -> Agent:
+        return Agent(
+            config=self.agents_config["redator_artigo"],
+            verbose=True,  # Reduzir verbosidade para economizar tokens
+            tools=[],
+            llm=llm,
+        )
+    
     @task
     def realizar_pesquisa(self) -> Task:
         return Task(
@@ -60,13 +70,30 @@ class PesquisaCrew:
         return Task(
             config=self.tasks_config["sintetizar_informacoes"],
         )
+    
+    @task
+    def pesquisa_wikipedia_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["pesquisa_wikipedia_task"],
+        )
+
+    @task
+    def escrever_artigo_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["escrever_artigo_task"],
+        )
 
     @crew
     def crew(self) -> Crew:
+        # Podemos escolher o fluxo desejado
+        return self.wikipedia_artigo_crew()
+    
+    def pesquisa_ddg_crew(self) -> Crew:
+        """Fluxo de pesquisa usando DuckDuckGo com posterior sintetização"""
         # Criamos as tarefas
         pesquisa_task = self.realizar_pesquisa()
         sintese_task = self.sintetizar_informacoes()
-
+        
         # Configuramos o fluxo de trabalho para processar sequencialmente
         return Crew(
             agents=[self.pesquisador(), self.sintetizador()],
@@ -74,66 +101,40 @@ class PesquisaCrew:
             process=Process.sequential,
             verbose=True,
         )
+    
+    def wikipedia_artigo_crew(self) -> Crew:
+        """Fluxo de pesquisa na Wikipedia com criação de artigo"""
+        # Criamos as tarefas
+        wiki_task = self.pesquisa_wikipedia_task()
+        artigo_task = self.escrever_artigo_task()
+        
+        # Configuramos o fluxo de trabalho para processar sequencialmente
+        return Crew(
+            agents=[self.wikipedia_pesquisador(), self.redator_artigo()],
+            tasks=[wiki_task, artigo_task],
+            process=Process.sequential,
+            verbose=False,  # Reduzir verbosidade para economizar tokens
+        )
         
     def format_output(self, result) -> PesquisaOutput:
         """
         Formata o resultado da Crew usando o modelo Pydantic.
-        
-        Args:
-            result: O resultado bruto da execução da Crew (pode ser string ou objeto CrewOutput)
-            
-        Returns:
-            Um objeto PesquisaOutput formatado
         """
         try:
-            # Verifica se o resultado é uma string ou um objeto
-            resultado_texto = ""
+            # Simplificando a extração do resultado para reduzir processamento
             if hasattr(result, "raw_output"):
-                # CrewOutput tem um atributo raw_output
                 resultado_texto = str(result.raw_output)
-            elif hasattr(result, "__str__"):
-                # Se não for CrewOutput mas tiver método __str__
-                resultado_texto = str(result)
             else:
-                # Caso seja outro tipo de objeto
-                resultado_texto = f"Resultados da pesquisa: {repr(result)}"
+                resultado_texto = str(result)
             
-            # Agora processamos o texto
-            linhas = resultado_texto.split('\n')
-            tema = ""
-            resumo = ""
-            resultados = []
+            # Simplificando a estrutura do resultado
+            tema = "Artigo sobre o tema solicitado"
+            resumo = resultado_texto
             
-            # Identificamos o tema e o resumo
-            for i, linha in enumerate(linhas):
-                linha = linha.strip()
-                if not linha:
-                    continue
-                    
-                if i == 0 and ":" in linha:
-                    # Primeira linha geralmente contém o tema
-                    tema = linha.split(":", 1)[1].strip()
-                elif "resumo" in linha.lower() or i == len(linhas) - 1:
-                    # Última linha ou linha marcada como resumo
-                    resumo = linha.strip()
-                elif linha and not linha.startswith("-"):
-                    # Outras linhas não vazias são provavelmente tópicos
-                    descricao = linha
-                    resultados.append(PesquisaResultado(topico=f"Tópico {len(resultados)+1}", descricao=descricao))
-            
-            # Se não conseguimos identificar o tema, usamos o texto da pesquisa
-            if not tema:
-                tema = "Resultados da pesquisa"
-            
-            # Se não conseguimos identificar o resumo, usamos o último resultado ou o texto completo
-            if not resumo and resultados:
-                resumo = resultados[-1].descricao
-            elif not resumo:
-                resumo = resultado_texto[:200] + "..." if len(resultado_texto) > 200 else resultado_texto
-                
+            # Removendo a criação de múltiplos resultados para economizar tokens
             return PesquisaOutput(
                 tema=tema,
-                resultados=resultados if resultados else [PesquisaResultado(topico="Resultado geral", descricao=resultado_texto)],
+                resultados=[PesquisaResultado(topico="Artigo", descricao="Artigo de 300 palavras gerado")],
                 resumo=resumo
             )
         except Exception as e:

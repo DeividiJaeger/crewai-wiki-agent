@@ -21,3 +21,23 @@ sintetizar_informacoes:
     O texto deve ser fácil de entender e cobrir o tema de forma geral, sem detalhes técnicos.
 
   agent: sintetizador
+
+pesquisa_wikipedia_task:
+  description: >
+    Busque na Wikipedia apenas as informações essenciais sobre: {tema}
+    Use o parâmetro max_chars=1500 para limitar o tamanho do resultado.
+
+  expected_output: >
+    Resumo conciso das informações principais (máximo 1500 caracteres)
+
+  agent: wikipedia_pesquisador
+
+escrever_artigo_task:
+  description: >
+    Escreva um artigo de exatamente 300 palavras sobre "{tema}" usando 
+    as informações fornecidas. Estruture com introdução, desenvolvimento e conclusão.
+
+  expected_output: >
+    Um artigo de exatamente 300 palavras, bem estruturado e informativo.
+
+  agent: redator_artigo
